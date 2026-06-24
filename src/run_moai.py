@@ -122,7 +122,8 @@ def _continuous_complement(df, demes, deme_ids):
     Underpowered (sparse measurement) and reported as such; size itself is omitted
     because moai size is time-transgressive."""
     print("\n[continuous scale-free ratios — COMPLEMENT, time-transgression caveat]")
-    num = lambda c: pd.to_numeric(df[c], errors="coerce").values
+    def num(c):
+        return pd.to_numeric(df[c], errors="coerce").values
     ratios = {
         "FACE_WIDTH/FACE_LENGTH": num("FACE_WIDTHcm") / num("FACE_LENGTHcm"),
         "HEAD_WIDTH/HEAD_DEPTH":  num("HEAD_WIDTHcm") / num("HEAD_DEPTHcm"),

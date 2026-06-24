@@ -25,7 +25,6 @@ spatially structured at all, and at what grain.
 Run: PYTHONPATH=src python src/run_moai_spatial.py > output/moai_spatial.txt 2>&1
 """
 import numpy as np
-import pandas as pd
 
 import moai
 
@@ -118,13 +117,12 @@ def main():
 
     print("\n[distance-binned mean style distance: observed vs null]")
     print(f"  {'distance (km)':<16}{'pairs':>7}{'obs':>9}{'null':>9}{'p(obs<null)':>13}")
+    s_all = Dstyle[iu]
+    valid = np.isfinite(s_all) & ~same          # between-ahu pairs with shared loci
+    gv = geo[valid]                             # their geographic distances (km)
     for b in range(len(BINS) - 1):
         lbl = f"{BINS[b]}-{BINS[b+1] if BINS[b+1]<100 else ''}".rstrip("-")
-        m = (geo[np.isfinite(Dstyle[iu]) & ~same] >= BINS[b])  # for count only
-        # recount pairs in bin
-        s = Dstyle[iu]; valid = np.isfinite(s) & ~same
-        gv, sv = geo[valid], s[valid]
-        inb = (gv >= BINS[b]) & (gv < BINS[b + 1])
+        inb = (gv >= BINS[b]) & (gv < BINS[b + 1])   # pairs falling in this bin
         nb = int(inb.sum())
         nullcol = null_bins[:, b]
         # p that observed bin mean is LOWER than null (more similar than chance)

@@ -16,7 +16,6 @@ W->E compositional gradient, not the distance slope (cf. the mata'a caveats).
 import numpy as np
 import pandas as pd
 
-import popgen
 
 STYLES = ["Rectangular", "Pentagonal", "Circular", "Irregular"]  # Incomplete dropped
 

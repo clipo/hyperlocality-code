@@ -12,11 +12,10 @@ Statistics are recomputed from the analysis modules so the figure traces to src/
 """
 import warnings
 import numpy as np
-import pandas as pd
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-from matplotlib.patches import Circle, FancyArrowPatch, Wedge
+from matplotlib.patches import Circle, Wedge
 
 import figbase
 import popgen
@@ -276,10 +275,13 @@ def fig_results(path="figures/fig3_results.png"):
     uc = umu_mod.counts(umu_mod.load())
     o, nm, lo, hi, p = _fst_row(uc)
     rows.append(("umu\n(oven style)", o, nm, lo, hi, p))
-    md = moai_mod.load(); mdem = moai_mod.primary_demes(md); mloci = moai_mod.select_loci(md)
+    md = moai_mod.load()
+    mdem = moai_mod.primary_demes(md)
+    mloci = moai_mod.select_loci(md)
     o, nm, _, _, p = _fst_row(None, md, mdem, mloci)
     rows.append(("moai\n(style, multilocus)", o, nm, np.nan, np.nan, p))
-    pk = pukao_mod.load(); pdem = pukao_mod.deme_labels(pk, 1500.0)
+    pk = pukao_mod.load()
+    pdem = pukao_mod.deme_labels(pk, 1500.0)
     o, nm, _, _, p = _fst_row(None, pk, pdem, True)
     rows.append(("pukao\n(style, multilocus)", o, nm, np.nan, np.nan, p))
 
@@ -335,9 +337,12 @@ def fig_results(path="figures/fig3_results.png"):
     for a, mm in counts.items():
         oo, pp, _, _ = popgen.gst_permutation(mm, n_perm=2000, rng=RNG)
         feats.append(a.replace("_", " ").title().replace("Plan", "plan"))
-        vals.append(oo); ps.append(pp)
+        vals.append(oo)
+        ps.append(pp)
     ordr = np.argsort(vals)
-    feats = [feats[i] for i in ordr]; vals = [vals[i] for i in ordr]; ps = [ps[i] for i in ordr]
+    feats = [feats[i] for i in ordr]
+    vals = [vals[i] for i in ordr]
+    ps = [ps[i] for i in ordr]
     cols = ["#1a5276" if pp < 0.05 else "#aaaaaa" for pp in ps]
     axC.barh(range(len(feats)), vals, color=cols)
     for i, (v, pp) in enumerate(zip(vals, ps)):
@@ -395,7 +400,9 @@ def fig_convergence(path="figures/fig5_convergence.png"):
     lw, _ = tables_io.stem_length_width()
     o_m, _, lo_m, hi_m, _ = _fst_row(lw.values.astype(float))
     o_u, _, lo_u, hi_u, _ = _fst_row(umu_mod.counts(umu_mod.load()))
-    md = moai_mod.load(); mdem = moai_mod.primary_demes(md); mloci = moai_mod.select_loci(md)
+    md = moai_mod.load()
+    mdem = moai_mod.primary_demes(md)
+    mloci = moai_mod.select_loci(md)
     o_o, _, _, _, _ = _fst_row(None, md, mdem, mloci)
 
     rows = [  # (label, value, lo, hi, color)
@@ -417,7 +424,8 @@ def fig_convergence(path="figures/fig5_convergence.png"):
                  xytext=(8, 0), textcoords="offset points", fontsize=7.2, color="#666666")
     axA.scatter([], [], s=95, color="#6a3d9a", label="genetic $F_{ST}$")
     axA.scatter([], [], s=95, color="#1a5276", label="cultural $F_{ST}$ (this study)")
-    axA.set_yticks(ys); axA.set_yticklabels([r[0] for r in rows], fontsize=8.5)
+    axA.set_yticks(ys)
+    axA.set_yticklabels([r[0] for r in rows], fontsize=8.5)
     axA.set_xlabel("$F_{ST}$  (bars = bootstrap 95% CI)")
     axA.set_title("A. Genes and artifacts both record strong intra-island structure",
                   fontsize=9.5, loc="left")
@@ -442,11 +450,13 @@ def fig_convergence(path="figures/fig5_convergence.png"):
     r_lw, rp_lw = plain_partial(lw)
     r_ss, rp_ss = plain_partial(ss)
     groups = ["mata'a\nstem L×W", "mata'a\nshape×shoulder"]
-    x = np.arange(len(groups)); w = 0.36
+    x = np.arange(len(groups))
+    w = 0.36
     axB.bar(x - w/2, [r_lw, r_ss], w, label="plain Mantel (vs distance)", color="#3a6ea5")
     axB.bar(x + w/2, [rp_lw, rp_ss], w, label="partial | east/SW region", color="#c0392b")
     axB.axhline(0, color="#333333", lw=0.8)
-    axB.set_xticks(x); axB.set_xticklabels(groups, fontsize=8.5)
+    axB.set_xticks(x)
+    axB.set_xticklabels(groups, fontsize=8.5)
     axB.set_ylabel("Mantel correlation $r$")
     axB.set_ylim(-0.15, 0.85)
     axB.set_title("B. The island-wide distance signal is a regional contrast",
@@ -486,7 +496,10 @@ def _relief_panel(ax, lon0, lon1, lat0, lat1, z, title):
     img, origin, zz = figbase.basemap(lon0, lon1, lat0, lat1, z=z, source="relief")
     H, W = img.shape[:2]
     ax.imshow(img)
-    ax.set_xlim(0, W); ax.set_ylim(H, 0); ax.set_xticks([]); ax.set_yticks([])
+    ax.set_xlim(0, W)
+    ax.set_ylim(H, 0)
+    ax.set_xticks([])
+    ax.set_yticks([])
     ax.set_title(title, fontsize=9.5, loc="left")
     return origin, zz, W, H
 

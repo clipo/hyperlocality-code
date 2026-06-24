@@ -1,0 +1,9 @@
+.git
+__pycache__/
+*.pyc
+output/*
+!output/.gitkeep
+figures/*
+!figures/.gitkeep
+figures/_tiles/
+.DS_Store

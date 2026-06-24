@@ -45,29 +45,44 @@ data/                 source data (see "Data" below)
 output/               script results are written here
 figures/              figures are written here
 reproduce.sh          runs the whole pipeline
-requirements.txt      Python dependencies
+requirements.txt      Python dependencies (loose bounds)
+requirements-lock.txt exact pinned versions used for the paper
+Dockerfile            pinned container for one-command reproduction
+Makefile              make install | reproduce | lint | docker | clean
+pyproject.toml        ruff lint configuration
 ```
 
-## Requirements
+## Reproduce in a container (recommended)
 
-Python 3.10+ and the packages in `requirements.txt`:
-
-```
-pip install -r requirements.txt
-```
-
-(numpy, scipy, pandas, matplotlib, openpyxl, Pillow.)
-
-## Reproduce everything
+The most reliable way to reproduce the results is the pinned Docker image. It needs
+only Docker installed.
 
 ```
+docker build -t hyperlocality-code .
+docker run --rm \
+  -v "$PWD/output:/work/output" -v "$PWD/figures:/work/figures" \
+  hyperlocality-code
+```
+
+This runs the full pipeline inside a Python 3.12 image with the exact dependency
+versions in `requirements-lock.txt`, writing the numeric results to `output/` and the
+figures to `figures/` on your host. The numeric pipeline runs fully offline; the
+figures step downloads a shaded-relief basemap, so allow network access if you want
+the maps.
+
+## Reproduce with a local Python environment
+
+Python 3.10+ (tested on 3.12.3). Install dependencies and run the pipeline:
+
+```
+python3 -m venv .venv && source .venv/bin/activate
+pip install -r requirements-lock.txt     # exact pinned versions used for the paper
+# or: pip install -r requirements.txt     # looser version bounds
 bash reproduce.sh
 ```
 
-This runs every analysis script, writes the numeric results to `output/`, and writes
-the figures to `figures/` in three formats (`.png`, `.pdf`, `.svg`). The figures step
-downloads a shaded-relief basemap and so needs an internet connection; the numeric
-results do not.
+`reproduce.sh` runs every analysis script, writing numeric results to `output/` and
+figures to `figures/` in three formats (`.png`, `.pdf`, `.svg`).
 
 To run a single step:
 
@@ -75,9 +90,23 @@ To run a single step:
 PYTHONPATH=src python3 src/run_hyperlocality.py
 ```
 
+A `Makefile` wraps the common tasks: `make install`, `make reproduce`, `make lint`,
+`make docker`, `make clean`.
+
 All randomized tests use fixed seeds (20260623 for the main analyses, 7 for the
-robustness battery), so results are bit-for-bit reproducible. Headline G~ST~ and
-island-wide Mantel tests use 9,999 permutations.
+robustness battery), so results are reproducible run to run. Headline G~ST~ and
+island-wide Mantel tests use 9,999 permutations; with the pinned versions above the
+reported values reproduce exactly.
+
+## Development / linting
+
+The analysis code passes [`ruff`](https://docs.astral.sh/ruff/) with the settings in
+`pyproject.toml`:
+
+```
+pip install ruff
+ruff check src/        # -> "All checks passed!"
+```
 
 ## Expected results
 

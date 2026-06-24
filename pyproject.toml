@@ -1,0 +1,5 @@
+# Tooling config for the reproduction repo. The analysis code passes
+# `ruff check src/` clean under these settings.
+[tool.ruff]
+target-version = "py312"
+line-length = 100

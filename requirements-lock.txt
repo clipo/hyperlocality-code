@@ -1,0 +1,10 @@
+# Exact pinned versions used to produce and verify the published results
+# (Python 3.12.3). Use this file for a bit-for-bit reproduction; use the looser
+# requirements.txt for a quick install. Install with:
+#   pip install -r requirements-lock.txt
+numpy==1.26.4
+scipy==1.17.0
+pandas==3.0.1
+matplotlib==3.10.8
+openpyxl==3.1.5
+Pillow==10.2.0

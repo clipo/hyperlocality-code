@@ -4,7 +4,6 @@ Outputs a text report to stdout (redirect to output/pukao_results.txt) and an
 IBD scatter to output/hyperlocality_pukao.png. All numbers here are what the
 manuscript Pukao paragraph should cite.
 """
-import sys
 import numpy as np
 import matplotlib
 matplotlib.use("Agg")
@@ -55,7 +54,6 @@ def report(threshold_m=1500.0):
 
     # --- multilocus F_ST ---
     obs, p, nm, null = pukao.multilocus_permutation(df, demes, n_perm=9999, rng=RNG)
-    bell = popgen.gst_multilocus  # Nei only; Bell per-locus averaged below
     print("\n[multilocus cultural F_ST]")
     print(f"  Nei multilocus G_ST = {obs:.4f}")
     print(f"  panmixia null mean  = {nm:.4f}  (95th pct {np.percentile(null,95):.4f})")
