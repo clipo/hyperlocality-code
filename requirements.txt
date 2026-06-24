@@ -1,0 +1,8 @@
+# Reproduction environment for the hyperlocality analysis.
+# Tested with Python 3.12 and the versions below; nearby versions should work.
+numpy>=1.26
+scipy>=1.11
+pandas>=2.0
+matplotlib>=3.8
+openpyxl>=3.1     # pandas.read_excel backend for the moai .xlsx database
+Pillow>=10.0      # basemap tile handling in figbase.py (figures only)

@@ -1,0 +1,15 @@
+# McCoy 1978 (Antiquity 52:204-216) "Stone-lined earth ovens in Easter Island",
+# Table 1: Numerical distribution of Umu Pae styles by survey quadrangle (Fig. 4).
+# Transcribed from data/umu/McCoy-1976-StoneLinedEarthOvens.pdf p.206 and
+# cross-checked: every row and column total matches the printed totals; the 344
+# classifiable ovens (487 total - 143 Incomplete) match McCoy's text.
+# Quadrangles are the 1968 SW/south-coast survey grids (roman numerals as printed;
+# III is absent from the published table). "Incomplete" = unclassifiable rim =
+# treat as missing in the F_ST analysis. NB 33 of Rano Kau's 54 circular ovens are
+# at one site (r-21, near Orongo) -> within-deme clustering caveat.
+quadrangle,roman,Rectangular,Pentagonal,Circular,Irregular,Incomplete
+Rano Kau,I,22,8,54,2,18
+Vinapu,II,19,7,12,0,0
+Maunga Orito,IV,8,4,3,1,11
+Hanga Poukura,V,24,20,21,1,33
+Vaihu,VI,32,64,37,5,81
