@@ -1,0 +1,405 @@
+{
+ "ahu": [
+  {
+   "site": "AHU TONGARIKI",
+   "lat": -27.125203916666667,
+   "lon": -109.27739385416666,
+   "community": 6,
+   "max_h": 8.1
+  },
+  {
+   "site": "UKNOWN AHU",
+   "lat": -27.10472719512195,
+   "lon": -109.30953965853658,
+   "community": 5,
+   "max_h": 5.2
+  },
+  {
+   "site": "AHU AKAHANGA",
+   "lat": -27.148962564102565,
+   "lon": -109.33637253846153,
+   "community": 0,
+   "max_h": 5.6
+  },
+  {
+   "site": "HEKII",
+   "lat": -27.088292608695653,
+   "lon": -109.29988573913043,
+   "community": 2,
+   "max_h": 3.8
+  },
+  {
+   "site": "AHU VINAPU",
+   "lat": -27.17683085,
+   "lon": -109.4065928,
+   "community": 3,
+   "max_h": 4.5
+  },
+  {
+   "site": "MOTU RAU NUKU",
+   "lat": -27.06004488235294,
+   "lon": -109.34706894117647,
+   "community": 4,
+   "max_h": null
+  },
+  {
+   "site": "URA URANGA TE MAHINA",
+   "lat": -27.15004982352941,
+   "lon": -109.33898094117647,
+   "community": 0,
+   "max_h": 6.6
+  },
+  {
+   "site": "AHU TEPEU",
+   "lat": -27.1050713125,
+   "lon": -109.4143116875,
+   "community": 1,
+   "max_h": 4.1
+  },
+  {
+   "site": "AHU NAU NAU",
+   "lat": -27.074415333333334,
+   "lon": -109.3223384,
+   "community": 2,
+   "max_h": 4.0
+  },
+  {
+   "site": "AHU TARAKIU",
+   "lat": -27.167320461538463,
+   "lon": -109.36535653846154,
+   "community": 3,
+   "max_h": 2.9
+  },
+  {
+   "site": "HANGA POUKURA",
+   "lat": -27.165043,
+   "lon": -109.38075375,
+   "community": -1,
+   "max_h": 4.7
+  },
+  {
+   "site": "RUNGA VA E",
+   "lat": -27.1401935,
+   "lon": -109.31863491666667,
+   "community": 0,
+   "max_h": 4.7
+  },
+  {
+   "site": "VAI MATA",
+   "lat": -27.064859000000002,
+   "lon": -109.3934425,
+   "community": -1,
+   "max_h": 4.9
+  },
+  {
+   "site": "HANGA PU NGAO",
+   "lat": -27.13872681818182,
+   "lon": -109.29574254545454,
+   "community": 0,
+   "max_h": null
+  },
+  {
+   "site": "RANO RARAKU",
+   "lat": -27.118204,
+   "lon": -109.297447,
+   "community": -1,
+   "max_h": 5.6
+  },
+  {
+   "site": "AHU MATA KETU",
+   "lat": -27.158140545454547,
+   "lon": -109.38793818181819,
+   "community": -1,
+   "max_h": 4.4
+  },
+  {
+   "site": "MAHATUA",
+   "lat": -27.0919397,
+   "lon": -109.2717539,
+   "community": 2,
+   "max_h": null
+  },
+  {
+   "site": "AHU OROI",
+   "lat": -27.142408111111113,
+   "lon": -109.32791422222222,
+   "community": 0,
+   "max_h": 5.6
+  },
+  {
+   "site": "AHU ONE MAKIHI",
+   "lat": -27.138188333333332,
+   "lon": -109.28320588888889,
+   "community": 0,
+   "max_h": 5.7
+  },
+  {
+   "site": "AHU HANGA TE'E",
+   "lat": -27.165888125,
+   "lon": -109.3620925,
+   "community": 3,
+   "max_h": 6.0
+  },
+  {
+   "site": "ANA O KEKE",
+   "lat": -27.104594625,
+   "lon": -109.241244375,
+   "community": -1,
+   "max_h": 2.1
+  },
+  {
+   "site": "AHU TE NUI",
+   "lat": -27.088747142857144,
+   "lon": -109.40754685714286,
+   "community": 1,
+   "max_h": 3.3
+  },
+  {
+   "site": "AHU A KIVI",
+   "lat": -27.11503,
+   "lon": -109.39504042857143,
+   "community": 1,
+   "max_h": 3.4
+  },
+  {
+   "site": "MAUNGA VEVERA",
+   "lat": -27.108878666666666,
+   "lon": -109.31147566666667,
+   "community": 5,
+   "max_h": 2.7
+  },
+  {
+   "site": "HOA ANGA VAKA O TUA PO",
+   "lat": -27.1440058,
+   "lon": -109.3305292,
+   "community": 0,
+   "max_h": 2.5
+  },
+  {
+   "site": "O HAE",
+   "lat": -27.0803756,
+   "lon": -109.308576,
+   "community": 2,
+   "max_h": 2.7
+  },
+  {
+   "site": "AHU VAI URI",
+   "lat": -27.139826,
+   "lon": -109.4274246,
+   "community": 1,
+   "max_h": null
+  },
+  {
+   "site": "OVAHE",
+   "lat": -27.0768146,
+   "lon": -109.3138826,
+   "community": 2,
+   "max_h": null
+  },
+  {
+   "site": "O URE",
+   "lat": -27.166567,
+   "lon": -109.38737875,
+   "community": 3,
+   "max_h": 3.6
+  },
+  {
+   "site": "RUNGA",
+   "lat": -27.07970725,
+   "lon": -109.3247255,
+   "community": 2,
+   "max_h": null
+  },
+  {
+   "site": "AHU MAITAKI TE MOA",
+   "lat": -27.07420625,
+   "lon": -109.400391,
+   "community": 7,
+   "max_h": 1.9
+  },
+  {
+   "site": "MAITAKI TE MOA",
+   "lat": -27.082698,
+   "lon": -109.40384475,
+   "community": 1,
+   "max_h": null
+  },
+  {
+   "site": "HANGA HAHAVE",
+   "lat": -27.167065,
+   "lon": -109.390399,
+   "community": 3,
+   "max_h": 4.7
+  },
+  {
+   "site": "OROI",
+   "lat": -27.139655,
+   "lon": -109.32856733333334,
+   "community": 0,
+   "max_h": 6.4
+  },
+  {
+   "site": "PARE",
+   "lat": -27.123641666666668,
+   "lon": -109.42137566666666,
+   "community": 1,
+   "max_h": null
+  },
+  {
+   "site": "AHU TE PITO KURA",
+   "lat": -27.085312666666667,
+   "lon": -109.30162366666667,
+   "community": -1,
+   "max_h": 9.8
+  },
+  {
+   "site": "MATA UURI",
+   "lat": -27.132142333333334,
+   "lon": -109.278342,
+   "community": 0,
+   "max_h": 2.7
+  },
+  {
+   "site": "AHU HANGA TETENGA",
+   "lat": -27.1376645,
+   "lon": -109.3129625,
+   "community": -1,
+   "max_h": null
+  },
+  {
+   "site": "HANGA PIKO",
+   "lat": -27.154828000000002,
+   "lon": -109.43875700000001,
+   "community": -1,
+   "max_h": 5.8
+  },
+  {
+   "site": "PUNA RERE TAKATEA",
+   "lat": -27.078134,
+   "lon": -109.3109915,
+   "community": 2,
+   "max_h": null
+  },
+  {
+   "site": "AHU A PINA",
+   "lat": -27.149386,
+   "lon": -109.43221449999999,
+   "community": 1,
+   "max_h": null
+  },
+  {
+   "site": "AKAHANGA",
+   "lat": -27.154188499999997,
+   "lon": -109.3452925,
+   "community": 0,
+   "max_h": null
+  },
+  {
+   "site": "MAHINA",
+   "lat": -27.0953975,
+   "lon": -109.294142,
+   "community": 2,
+   "max_h": 5.7
+  },
+  {
+   "site": "TE PA HAHA TEA",
+   "lat": -27.122110499999998,
+   "lon": -109.2713795,
+   "community": 6,
+   "max_h": 3.9
+  },
+  {
+   "site": "AHU ORONGO",
+   "lat": -27.145329,
+   "lon": -109.429926,
+   "community": 1,
+   "max_h": null
+  },
+  {
+   "site": "HANGA TAVAKA",
+   "lat": -27.0947055,
+   "lon": -109.2486875,
+   "community": 4,
+   "max_h": null
+  },
+  {
+   "site": "TEPEU",
+   "lat": -27.099716,
+   "lon": -109.399259,
+   "community": 1,
+   "max_h": null
+  },
+  {
+   "site": "HANGA O TEO",
+   "lat": -27.056512,
+   "lon": -109.373008,
+   "community": 4,
+   "max_h": null
+  },
+  {
+   "site": "MOTU TAVAKE",
+   "lat": -27.070368,
+   "lon": -109.398964,
+   "community": 7,
+   "max_h": 2.5
+  },
+  {
+   "site": "O PARE",
+   "lat": -27.127636,
+   "lon": -109.420749,
+   "community": 1,
+   "max_h": 4.4
+  },
+  {
+   "site": "KOE-HOKO",
+   "lat": -27.137859,
+   "lon": -109.306831,
+   "community": 0,
+   "max_h": null
+  },
+  {
+   "site": "URI A URENGA",
+   "lat": -27.154728,
+   "lon": -109.40135,
+   "community": 3,
+   "max_h": 3.5
+  },
+  {
+   "site": "MOAI TUU-TAHI",
+   "lat": -27.137488,
+   "lon": -109.290601,
+   "community": 0,
+   "max_h": 5.5
+  },
+  {
+   "site": "AHU PEA",
+   "lat": -27.147534,
+   "lon": -109.430732,
+   "community": 1,
+   "max_h": null
+  },
+  {
+   "site": "VAI TEKA",
+   "lat": -27.115687,
+   "lon": -109.402115,
+   "community": 1,
+   "max_h": null
+  },
+  {
+   "site": "O KAVA",
+   "lat": -27.154446,
+   "lon": -109.408142,
+   "community": 3,
+   "max_h": null
+  },
+  {
+   "site": "MATUKI",
+   "lat": -27.128464,
+   "lon": -109.375451,
+   "community": -1,
+   "max_h": null
+  }
+ ],
+ "n_comm": 8,
+ "n_edges": 69
+}

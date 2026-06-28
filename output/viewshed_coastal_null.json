@@ -1,0 +1,56 @@
+{
+  "obs": {
+    "mean_degree": 2.8947368421052633,
+    "mutual": 69,
+    "modularity": 0.732,
+    "n_comm": 8,
+    "comm_diam_km": 4.98
+  },
+  "tests": {
+    "modularity": {
+      "observed": 0.732,
+      "null_mean": 0.564,
+      "null_lo": 0.393,
+      "null_hi": 0.705,
+      "p_obs_gt_null": 0.9894,
+      "z": 2.09
+    },
+    "n_comm": {
+      "observed": 8,
+      "null_mean": 5.989,
+      "null_lo": 4.0,
+      "null_hi": 9.0,
+      "p_obs_gt_null": 0.8558,
+      "z": 1.44
+    },
+    "comm_diam_km": {
+      "observed": 4.98,
+      "null_mean": 7.16,
+      "null_lo": 3.979,
+      "null_hi": 11.393,
+      "p_obs_gt_null": 0.1242,
+      "z": -1.09
+    },
+    "mean_degree": {
+      "observed": 2.8947368421052633,
+      "null_mean": 3.86,
+      "null_lo": 2.35,
+      "null_hi": 5.72,
+      "p_obs_gt_null": 0.1292,
+      "z": -1.12
+    },
+    "mutual": {
+      "observed": 69,
+      "null_mean": 95.575,
+      "null_lo": 57.0,
+      "null_hi": 145.0,
+      "p_obs_gt_null": 0.1055,
+      "z": -1.16
+    }
+  },
+  "K": 800,
+  "null_model": "distance-to-coast-matched siting",
+  "tol_m": 150.0,
+  "ahu_dc_median_m": 536.0,
+  "ahu_dc_mean_m": 867.0
+}
