@@ -1,61 +1,75 @@
 # hyperlocality-code
 
-Reproduction code and data for **"Measuring hyperlocality: cultural F~ST~ and
-fine-grained spatial differentiation in Rapa Nui material culture"**
+Reproduction code and data for **"Measuring cultural hyperlocality: a multi-proxy
+cultural F~ST~ test of bounded transmission on Rapa Nui (Easter Island)"**
 (Lipo, DiNapoli & Hunt).
 
-This repository contains everything needed to reproduce the quantitative results
-and figures in the paper from the source data, using only open Python scientific
-libraries. It is a self-contained subset of the analysis: the manuscript text and
-copyrighted source PDFs are not included.
+This repository reproduces the quantitative results and figures of the paper from the
+source data, using open Python scientific libraries. The manuscript text and
+copyrighted source PDFs are not included. The licensed 50 cm terrain model used for
+the monument-intervisibility analysis is **not redistributable**; the committed
+intermediates let the rest reproduce without it (see *Licensed DEM* below).
 
 ## What the paper tests
 
-Rapa Nui (Easter Island, Chile) is 164 km² and can be crossed on foot in a day, so
-an island-wide pool of social interaction was available. Most models of cultural
-transmission predict that such a pool erases differences between places. The
-artifact record shows the opposite: material culture is patterned at a fine spatial
-grain. We test the prediction of Lipo, DiNapoli, Madsen & Hunt (2021, *PLOS ONE*
-e0250690) that variation in four artifact classes is structured by location, by
-treating classes as alleles and spatial groups of artifacts as demes, measuring
-between-place structure as **cultural F~ST~** against a **panmixia permutation null**,
-and adding **within-cluster** and **isolation-by-distance** tests to ask whether the
-structure is local.
+Rapa Nui is 164 km² and can be crossed on foot in a day, so an island-wide pool of
+social interaction was available; most models of cultural transmission predict such a
+pool erases between-place differences. The artifact record shows the opposite. We test
+the prediction of Lipo, DiNapoli, Madsen & Hunt (2021, *PLOS ONE* e0250690) that
+variation in four artifact classes is patterned by location, by treating classes as
+alleles and spatial groups of artifacts as demes and estimating between-community
+**cultural F~ST~**. The four proxies are *mata'a* (stemmed obsidian tools), *umu*
+(earth ovens), *pukao* (topknots), and *moai* (the statues).
 
-The four proxies are *mata'a* (stemmed obsidian tools), *umu* (stone-lined earth
-ovens), *pukao* (carved red scoria hats), and *moai* (the statues).
+The analysis has three parts:
+
+1. **Cultural F~ST~ (primary).** A hierarchical Bayesian (Balding–Nichols
+   Dirichlet-multinomial) model estimates F~ST~ as a posterior and weighs structure
+   against panmixia with a **Bayes factor**. The standard frequentist statistics
+   (Nei G~ST~, the Bell estimator, permutation tests) are computed alongside **for
+   comparison**.
+2. **Spatial locality.** Within-cluster fits, isolation-by-distance regressions, and
+   an individual-statue (clustering-free) test of *moai* style.
+3. **Monument intervisibility and matched nulls.** Visual communities from the *ahu*
+   intervisibility network, the cross-proxy concordance, and three spatially matched
+   nulls (S-1: contiguity-preserving concordance null; S-2: intervisibility vs.
+   contiguity-matched partition; S-3: distance-to-coast-matched viewshed null).
 
 ## Repository layout
 
 ```
 src/                  analysis code (run from the repo root with PYTHONPATH=src)
-  popgen.py           cultural F_ST (Nei G_ST), panmixia null, Bell estimator,
+  bayes.py            hierarchical Bayesian cultural F_ST + SMC Bayes factor (PyMC)
+  run_bayes.py        primary Bayesian analysis -> output/bayes_results.json
+  popgen.py           frequentist cultural F_ST (Nei G_ST), permutation null, Bell,
                       bootstrap CIs, Mantel / partial Mantel
-  spatial.py          mata'a assemblage coordinates (from the provenance map)
-  tables_io.py        loads the published mata'a count matrices (CSV)
-  umu.py  moai.py  pukao.py    per-proxy data loaders + deme construction
+  tables_io.py spatial.py umu.py moai.py pukao.py   data loaders + deme construction
   figbase.py          basemap tiles for the figures
-  run_hyperlocality.py    mata'a: F_ST, within-cluster, isolation-by-distance
-  harden.py               mata'a robustness battery (jitter, bootstrap, LOO)
-  run_umu.py  run_moai.py  run_pukao.py    the other proxies
-  run_moai_spatial.py     moai individual-statue spatial structure (no clustering)
-  check_source.py         obsidian-source provenance counts
-  make_figures.py         all figures, written as .png, .pdf and .svg
-data/                 source data (see "Data" below)
-output/               script results are written here
+  run_hyperlocality.py harden.py run_umu.py run_moai.py run_pukao.py
+                      frequentist comparison + robustness battery
+  run_moai_spatial.py        moai individual-statue spatial structure (no clustering)
+  run_moai_linkage_sweep.py  moai cross-linkage robustness
+  run_moai_territory_bayes.py Bayesian named-territory cross-check
+  check_source.py            obsidian-source provenance counts
+  ahu_viewshed.py viewshed_models.py   viewsheds + random-siting null (need the DEM)
+  make_communities.py        visual communities from the viewshed matrix (DEM-free)
+  run_concordance.py         moai style across the visual communities
+  run_concordance_ksweep.py  concordance sensitivity to cluster count
+  run_concordance_contig_null.py   S-1: contiguity-preserving concordance null
+  run_intervis_vs_spatial.py run_intervis_bc.py   S-2: intervisibility vs matched null
+  run_viewshed_coastal_null.py     S-3: distance-to-coast-matched viewshed null (DEM)
+  make_figures.py make_viewshed_figure.py make_demic_structure_figure.py
+  make_explainer_figures.py make_mataa_anatomy_figure.py make_moai_anatomy_figure.py
+  make_moai_csv.py           extract ahu-placed moai coords/heights from the database
+data/                 source data (see "Data" below), incl. committed viewshed/ matrix
+output/               numeric results + committed intermediates the figures read
 figures/              figures are written here
-reproduce.sh          runs the whole pipeline
-requirements.txt      Python dependencies (loose bounds)
-requirements-lock.txt exact pinned versions used for the paper
-Dockerfile            pinned container for one-command reproduction
-Makefile              make install | reproduce | lint | docker | clean
-pyproject.toml        ruff lint configuration
+reproduce.sh          runs the whole pipeline (DEM-free by default)
+requirements.txt / requirements-lock.txt   dependencies (loose / pinned)
+Dockerfile  Makefile  pyproject.toml
 ```
 
 ## Reproduce in a container (recommended)
-
-The most reliable way to reproduce the results is the pinned Docker image. It needs
-only Docker installed.
 
 ```
 docker build -t hyperlocality-code .
@@ -64,15 +78,14 @@ docker run --rm \
   hyperlocality-code
 ```
 
-This runs the full pipeline inside a Python 3.12 image with the exact dependency
-versions in `requirements-lock.txt`, writing the numeric results to `output/` and the
-figures to `figures/` on your host. The numeric pipeline runs fully offline; the
-figures step downloads a shaded-relief basemap, so allow network access if you want
-the maps.
+The image pins the exact dependency versions in `requirements-lock.txt` (Python 3.12,
+PyMC 5.25, ArviZ 0.23, NumPy 1.26, SciPy 1.17). The numeric pipeline runs offline; the
+main-figure step downloads a shaded-relief basemap, so allow network access for the
+maps.
 
 ## Reproduce with a local Python environment
 
-Python 3.10+ (tested on 3.12.3). Install dependencies and run the pipeline:
+Python 3.12 (tested on 3.12.3). PyMC requires NumPy < 2.
 
 ```
 python3 -m venv .venv && source .venv/bin/activate
@@ -81,75 +94,87 @@ pip install -r requirements-lock.txt     # exact pinned versions used for the pa
 bash reproduce.sh
 ```
 
-`reproduce.sh` runs every analysis script, writing numeric results to `output/` and
-figures to `figures/` in three formats (`.png`, `.pdf`, `.svg`).
-
-To run a single step:
+`reproduce.sh` runs the Bayesian analysis, the frequentist comparison, the
+intervisibility and matched-null tests, and the figures. To run a single step:
 
 ```
-PYTHONPATH=src python3 src/run_hyperlocality.py
+PYTHONPATH=src python3 src/run_bayes.py
 ```
 
-A `Makefile` wraps the common tasks: `make install`, `make reproduce`, `make lint`,
-`make docker`, `make clean`.
+`make install | reproduce | lint | docker | clean` wraps the common tasks.
 
-All randomized tests use fixed seeds (20260623 for the main analyses, 7 for the
-robustness battery), so results are reproducible run to run. Headline G~ST~ and
-island-wide Mantel tests use 9,999 permutations; with the pinned versions above the
-reported values reproduce exactly.
+Each analysis uses a fixed seed, so results reproduce run to run: the Bayesian
+analysis uses 20260623; the spatial and null analyses use 20260626–20260628; the
+mata'a robustness battery uses 7. Bayes factors use sequential Monte Carlo (2,000
+particles per chain); permutation tests use up to 9,999 permutations.
 
-## Development / linting
+## Licensed DEM (not redistributable)
 
-The analysis code passes [`ruff`](https://docs.astral.sh/ruff/) with the settings in
-`pyproject.toml`:
-
-```
-pip install ruff
-ruff check src/        # -> "All checks passed!"
-```
+The monument-intervisibility analysis runs over a 50 cm Vricon V3D digital terrain
+model (worked at 5 m), licensed to the authors and **not shared**. The scripts read it
+through the `RAPANUI_DEM` environment variable. Because it is not redistributed, the
+committed intermediates — `data/viewshed/ahu_viewshed.json` (the mutual-visibility
+matrix), `output/viewshed_models.json` (the random-siting null), and
+`output/viewshed_coastal_null.json` (the S-3 distance-matched null) — let everything
+reproduce **without the DEM**. `reproduce.sh` recomputes the viewsheds only if
+`RAPANUI_DEM` is set (and GDAL/`osgeo` is installed); otherwise it uses the committed
+intermediates, and Figure 6's hillshade panel falls back to the committed PNG.
 
 ## Expected results
 
-| Proxy | Cultural F~ST~ | Panmixia null | Ratio | p |
-|---|---|---|---|---|
-| *mata'a* stem length × width | 0.053 | 0.022 | 2.4× | 0.0001 |
-| *umu* oven style | 0.082 | 0.012 | 7.1× | 0.0001 |
-| *moai* style (multilocus) | 0.087 | 0.042 | 2.1× | 0.0001 |
-| *pukao* | 0.13–0.22 | ~0.15 | 1.1–1.3× | n.s. |
+**Cultural F~ST~ (Bayesian posterior median [95% HDI]; Bayes factor on the
+Kass–Raftery 2 ln BF scale), with the frequentist Nei G~ST~ shown for comparison:**
 
-Locality checks: *mata'a* differentiation holds **within a 5.5 km cluster**
-(F~ST~ = 0.037, null 0.016, p = 0.0008); the island-wide Mantel signal is a regional
-(east vs southwest) contrast, not a smooth gradient (partial Mantel controlling
-region is not significant). *moai* style is more alike at short range between
-different *ahu* (Mantel r = 0.055, p = 0.04; significant only below ~4 km). *pukao*
-is uninformative (smallest sample; wide null).
+| Proxy | Posterior F~ST~ [95% HDI] | 2 ln BF | Nei G~ST~ |
+|---|---|---|---|
+| *mata'a* stem length × width | 0.028 [0.013, 0.047] | +19.4 | 0.053 |
+| *mata'a* shape × shoulder | 0.058 [0.019, 0.113] | +12.6 | 0.060 |
+| *mata'a* outline (scale-free control) | 0.003 [0.000, 0.018] | −10.2 | — |
+| *umu* oven style | 0.073 [0.022, 0.160] | +29.0 | 0.082 |
+| *moai* style (multilocus, k = 6) | 0.049 [0.020, 0.086] | +13.9 | 0.087 |
+| *pukao* style | 0.047 [0.000, 0.147] | −5.3 | 0.185 |
+
+Three proxies (*mata'a*, *umu*, *moai*) exclude zero with Bayes factors favoring
+structure; the scale-free outline control and the small *pukao* sample favor panmixia.
+*Mata'a* differentiation is **hyperlocal**, holding within a 5.5 km cluster
+(stem-width F~ST~ = 0.068 [0.015, 0.152], 2 ln BF = +10.8).
+
+**Intervisibility and matched nulls.** The *moai* are mostly intervisible only locally
+(mean mutual-visibility degree 2.9 of 56). The visual/style concordance does **not**
+exceed a spatially matched null (S-1: ARI 0.36 vs 0.54, P = 0.93; S-2: G~ST~ 0.099 vs
+0.120, P = 0.83), so it reflects spatial autocorrelation, not a shared community map.
+Against a distance-to-coast-matched null (S-3) only the network modularity remains
+marginally elevated (0.73 vs 0.56, P ≈ 0.01); community count and size fall within the
+null. *Moai* cross-linkage robustness: G~ST~ is 2.1×/2.0×/1.6× its null under
+complete/average/ward linkage (single-linkage chains the coastal *ahu*). Named-territory
+cross-check: posterior F~ST~ = 0.043 [0.016, 0.078], 2 ln BF = +9.3.
 
 ## Data
 
-All data here are either public databases or counts/coordinates read from published
-figures and tables. Copyrighted source PDFs are **not** redistributed.
+All data are public databases or counts/coordinates read from published figures and
+tables. Copyrighted source PDFs are not redistributed.
 
-- `data/published_lengthwidth.csv`, `data/published_shapeshoulder.csv` — the
-  *mata'a* paradigmatic-class count matrices (11 provenanced assemblages × occupied
-  classes), parsed from the published stylistic-variability study and validated
-  against the printed row totals.
-- `data/xyfinaldatawithids.csv` — *mata'a* outline dataset with the obsidian
-  `Source` field used by `check_source.py`.
-- `data/Figure3.svg` — the *mata'a* provenance map, included as the source from
-  which assemblage coordinates were read (the coordinates themselves are encoded in
-  `src/spatial.py`).
-- `data/umu/umu_pae_table1.csv` — McCoy's earth-oven rim-style tallies by survey
-  quadrangle.
-- `data/moai/MOAI_DATABASE_PUBLIC.xlsx` — the public *moai* database (coordinates +
-  categorical style attributes).
-- `data/pukao/Pukao.csv` — recorded *pukao* with coordinates and categorical
-  attributes.
+- `output/published_lengthwidth.csv`, `output/published_shapeshoulder.csv` — the
+  *mata'a* paradigmatic-class count matrices (validated against printed row totals;
+  the committed source of truth for `tables_io.py`).
+- `data/xyfinaldatawithids.csv`, `data/xyfinaldatawithids-smallassemblagesremoved.txt`
+  — *mata'a* outline data (the `Source` field used by `check_source.py`; the outline
+  used by the anatomy figure).
+- `data/Figure3.svg` — the *mata'a* provenance map; coordinates are encoded in
+  `src/spatial.py`.
+- `data/umu/umu_pae_table1.csv` — McCoy's earth-oven rim-style tallies.
+- `data/moai/MOAI_DATABASE_PUBLIC.xlsx`, `data/moai/moai_locations_heights.csv` — the
+  public *moai* database and the extracted coordinates/heights.
+- `data/pukao/Pukao.csv` — recorded *pukao*.
+- `data/viewshed/ahu_viewshed.json`, `data/viewshed/ahu_communities.json` — the
+  committed mutual-visibility matrix and the derived visual communities (so the
+  intervisibility analysis reproduces without the licensed DEM).
 
 ### Known data limitations (stated honestly)
 
-- *mata'a* and *umu* coordinates are **read from published maps**, not field GPS, so
-  the spatial claims rest on rank-based, jitter-robust, within-cluster tests rather
-  than absolute distances.
+- *mata'a* and *umu* coordinates are read from published maps, not field GPS, so the
+  spatial claims rest on jitter-robust, within-cluster tests rather than absolute
+  distances.
 - The *moai* and *pukao* style attributes come from existing databases and carry
   whatever inter-observer variation the original scoring introduced.
 - Assemblages are time-averaged; the analysis describes between-community structure
@@ -157,14 +182,17 @@ figures and tables. Copyrighted source PDFs are **not** redistributed.
 
 ## Method in one paragraph
 
-For each proxy we form a frequency matrix of classes by deme and compute Nei's
-multilocus G~ST~ (the cultural F~ST~). Significance is assessed against a panmixia
-null that re-deals every artifact into demes of the observed sizes and recomputes
-G~ST~ on each of 9,999 random partitions; the reported p is the share of null values
-at least as large as the observed one. We cross-check with the Bell variance-ratio
-estimator and report within-deme bootstrap intervals. Locality is tested by
-restricting to a tight spatial cluster and by Mantel / partial Mantel correlation of
-compositional distance with geographic distance. See `src/popgen.py`.
+For each proxy we form a frequency matrix of classes by deme and estimate cultural
+F~ST~ as a parameter in a hierarchical Balding–Nichols Dirichlet-multinomial model,
+reporting the posterior median, its 95% HDI, and a structure-versus-panmixia Bayes
+factor (marginal likelihoods by sequential Monte Carlo). The standard frequentist
+statistics (Nei's multilocus G~ST~ against a panmixia permutation null, the Bell
+variance-ratio estimator, bootstrap intervals) are computed alongside for comparison.
+Locality is tested by restricting to a tight spatial cluster, by Mantel / partial
+Mantel correlation, and by an individual-statue randomization test. Monument
+intervisibility is read from a high-resolution terrain model; the visual communities
+and the cross-proxy concordance are evaluated against spatially matched nulls. See
+`src/bayes.py`, `src/popgen.py`, and `src/viewshed_models.py`.
 
 ## Citation
 

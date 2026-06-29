@@ -13,6 +13,10 @@ FROM python:3.12-slim
 
 WORKDIR /work
 
+# PyMC/PyTensor compile C at runtime, so a C/C++ toolchain is required.
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        build-essential && rm -rf /var/lib/apt/lists/*
+
 # Pinned dependencies first, so the layer caches independently of the code.
 COPY requirements-lock.txt .
 RUN pip install --no-cache-dir -r requirements-lock.txt

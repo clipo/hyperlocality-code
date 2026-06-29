@@ -6,10 +6,14 @@
                     feature F_ST + mata'a isolation-by-distance
   fig4_variability.png  geography of the variability: per-place class composition
                     (mata'a SW pies, umu quadrangle pies, moai head-plan by statue)
-  fig5_convergence.png  genetic vs cultural F_ST; regional-contrast Mantel
+  fig5_convergence.png  genetic vs cultural F_ST; regional-contrast distance slope
 
-Statistics are recomputed from the analysis modules so the figure traces to src/.
+The Bayesian statistics (posterior F_ST, 95% HDIs, Bayes factors) are read from
+output/bayes_results.json, the single source of truth written by run_bayes.py.
+The fast isolation-by-distance regressions are recomputed live from bayes.py.
 """
+import json
+import os
 import warnings
 import numpy as np
 import matplotlib
@@ -24,8 +28,34 @@ import umu as umu_mod
 import moai as moai_mod
 import pukao as pukao_mod
 import spatial
+import bayes
 
 RNG = np.random.default_rng(20260623)
+
+BAYES_JSON = "output/bayes_results.json"
+
+# East-coast parcel surveys (vs the SW coast) for the region-contrast IBD control.
+PARCELS_FIG = ["Parcel 6", "Parcel 7", "Parcel 8",
+               "Parcel 9", "Parcel 10", "Parcel 11"]
+
+
+def _bayes():
+    """Load the Bayesian results JSON (run src/run_bayes.py first)."""
+    if not os.path.exists(BAYES_JSON):
+        raise FileNotFoundError(
+            f"{BAYES_JSON} not found -- run `PYTHONPATH=src .venv/bin/python "
+            "src/run_bayes.py` before building figures.")
+    with open(BAYES_JSON) as f:
+        return json.load(f)["proxies"]
+
+
+def _bf_label(two_ln_bf):
+    """Short annotation for a 2 ln BF value on the Kass-Raftery scale."""
+    a = abs(two_ln_bf)
+    band = "very strong" if a >= 10 else "strong" if a >= 6 else \
+           "positive" if a >= 2 else "weak"
+    side = "structure" if two_ln_bf > 0 else "panmixia"
+    return f"2 ln BF = {two_ln_bf:+.0f} ({band} for {side})"
 
 
 def _savefig(fig, path, dpi=160):
@@ -250,59 +280,32 @@ def fig_concept(path="figures/fig1_concept.png"):
 
 
 # ----------------------------------------------------------------------------
-def _fst_row(counts, multilocus_df=None, demes=None, loci=None, nperm=9999):
-    if multilocus_df is None:
-        obs, p, nm, _ = popgen.gst_permutation(counts, n_perm=nperm, rng=RNG)
-        (lo, _, hi), _ = popgen.gst_bootstrap_ci(counts, n_boot=1000, rng=RNG)
-    else:
-        if loci is not None and hasattr(multilocus_df, "columns") and "CLAN_BOUNDARY" in multilocus_df.columns:
-            obs, p, nm, _ = moai_mod.multilocus_permutation(multilocus_df, demes, loci, n_perm=nperm, rng=RNG)
-        else:
-            obs, p, nm, _ = pukao_mod.multilocus_permutation(multilocus_df, demes, n_perm=nperm, rng=RNG)
-        lo = hi = np.nan
-    return obs, nm, lo, hi, p
-
-
 def fig_results(path="figures/fig3_results.png"):
+    B = _bayes()
     fig, axes = plt.subplots(2, 2, figsize=(11.5, 9))
     axA, axB, axC, axD = axes.ravel()
 
-    # --- Panel A: cultural F_ST vs panmixia null across proxies ---
-    lw, _ = tables_io.stem_length_width()
-    rows = []
-    o, nm, lo, hi, p = _fst_row(lw.values.astype(float))
-    rows.append(("mata'a\n(stem L×W)", o, nm, lo, hi, p))
-    uc = umu_mod.counts(umu_mod.load())
-    o, nm, lo, hi, p = _fst_row(uc)
-    rows.append(("umu\n(oven style)", o, nm, lo, hi, p))
-    md = moai_mod.load()
-    mdem = moai_mod.primary_demes(md)
-    mloci = moai_mod.select_loci(md)
-    o, nm, _, _, p = _fst_row(None, md, mdem, mloci)
-    rows.append(("moai\n(style, multilocus)", o, nm, np.nan, np.nan, p))
-    pk = pukao_mod.load()
-    pdem = pukao_mod.deme_labels(pk, 1500.0)
-    o, nm, _, _, p = _fst_row(None, pk, pdem, True)
-    rows.append(("pukao\n(style, multilocus)", o, nm, np.nan, np.nan, p))
-
+    # --- Panel A: posterior cultural F_ST (median + 95% HDI) across proxies ---
+    rows = [
+        ("mata'a\n(stem L×W)", B["mataa"]["headline"]["lengthwidth"]),
+        ("umu\n(oven style)", B["umu"]["headline"]),
+        ("moai\n(style, multilocus)", B["moai"]["headline"]),
+        ("pukao\n(style, multilocus)", B["pukao"]["headline"]),
+    ]
     ys = np.arange(len(rows))[::-1]
-    for y, (lab, o, nm, lo, hi, p) in zip(ys, rows):
-        sig = p < 0.05
-        col = "#1a5276" if sig else "#888888"
-        if np.isfinite(lo):
-            axA.plot([lo, hi], [y, y], color=col, lw=2.4, zorder=2)
-        axA.scatter([o], [y], s=70, color=col, zorder=3)
-        axA.scatter([nm], [y], s=70, marker="D", facecolors="white",
-                    edgecolors="#c0392b", zorder=3)
-        star = "***" if p < 0.001 else ("**" if p < 0.01 else ("*" if p < 0.05 else "n.s."))
-        axA.annotate(f"{o/nm:.1f}× null, p={p:.4g} {star}",
-                     (max(o, hi if np.isfinite(hi) else o), y),
-                     textcoords="offset points", xytext=(8, 0), va="center",
-                     fontsize=8)
+    for y, (lab, rec) in zip(ys, rows):
+        strong = rec["two_ln_bf"] >= 6
+        col = "#1a5276" if strong else "#888888"
+        axA.plot([rec["hdi_lo"], rec["hdi_hi"]], [y, y], color=col, lw=2.6, zorder=2)
+        axA.scatter([rec["median"]], [y], s=70, color=col, zorder=3)
+        axA.annotate(_bf_label(rec["two_ln_bf"]),
+                     (rec["hdi_hi"], y), textcoords="offset points",
+                     xytext=(8, 0), va="center", fontsize=8)
+    axA.axvline(0, color="#cccccc", lw=0.8, zorder=1)
     axA.set_yticks(ys)
     axA.set_yticklabels([r[0] for r in rows], fontsize=9)
-    axA.set_xlabel("cultural $F_{ST}$  (filled = observed, red diamond = panmixia null mean)")
-    axA.set_title("A. Between-community structure exceeds the panmixia null in 3 of 4 proxies",
+    axA.set_xlabel("posterior cultural $F_{ST}$  (point = median, bar = 95% HDI)")
+    axA.set_title("A. Posterior between-community structure exceeds zero in 3 of 4 proxies",
                   fontsize=9.5, loc="left")
     axA.set_xlim(left=0)
     for sp in ("top", "right"):
@@ -331,31 +334,29 @@ def fig_results(path="figures/fig3_results.png"):
     axB.legend(fontsize=7.5, loc="upper center", ncol=4, frameon=False,
                columnspacing=1.0, handletextpad=0.4)
 
-    # --- Panel C: moai marginal F_ST by feature ---
-    counts = moai_mod.all_locus_counts(md, mdem, mloci)
-    feats, vals, ps = [], [], []
-    for a, mm in counts.items():
-        oo, pp, _, _ = popgen.gst_permutation(mm, n_perm=2000, rng=RNG)
+    # --- Panel C: moai per-locus posterior F_ST (median + 95% HDI) ---
+    marg = B["moai"]["marginal"]
+    feats, med, lo, hi = [], [], [], []
+    for a, rec in marg.items():
         feats.append(a.replace("_", " ").title().replace("Plan", "plan"))
-        vals.append(oo)
-        ps.append(pp)
-    ordr = np.argsort(vals)
+        med.append(rec["median"]); lo.append(rec["hdi_lo"]); hi.append(rec["hdi_hi"])
+    ordr = np.argsort(med)
     feats = [feats[i] for i in ordr]
-    vals = [vals[i] for i in ordr]
-    ps = [ps[i] for i in ordr]
-    cols = ["#1a5276" if pp < 0.05 else "#aaaaaa" for pp in ps]
-    axC.barh(range(len(feats)), vals, color=cols)
-    for i, (v, pp) in enumerate(zip(vals, ps)):
-        axC.annotate(("*" if pp < 0.05 else ""), (v, i), xytext=(3, -2),
-                     textcoords="offset points", fontsize=11)
-    axC.set_yticks(range(len(feats)))
+    med = np.array(med)[ordr]; lo = np.array(lo)[ordr]; hi = np.array(hi)[ordr]
+    yy = range(len(feats))
+    # a locus "carries" the signal if its 95% HDI clears the 0.01 structure floor
+    cols = ["#1a5276" if l > 0.01 else "#aaaaaa" for l in lo]
+    axC.barh(list(yy), med, color=cols, zorder=2)
+    axC.hlines(list(yy), lo, hi, color="#222222", lw=1.2, zorder=3)
+    axC.set_yticks(list(yy))
     axC.set_yticklabels(feats, fontsize=8)
-    axC.set_xlabel("marginal $F_{ST}$ (by spatial cluster)")
+    axC.set_xlabel("posterior marginal $F_{ST}$ (median, bar = 95% HDI)")
     axC.set_title("C. Moai: which style features carry the signal", fontsize=9.5, loc="left")
     for sp in ("top", "right"):
         axC.spines[sp].set_visible(False)
 
-    # --- Panel D: mata'a isolation by distance (island-wide) ---
+    # --- Panel D: mata'a isolation by distance with posterior credible band ---
+    lw, _ = tables_io.stem_length_width()
     names = list(lw.index)
     keep = [i for i, nm_ in enumerate(names) if spatial.has_coords(nm_)]
     ng = [names[i] for i in keep]
@@ -363,12 +364,17 @@ def fig_results(path="figures/fig3_results.png"):
     Dd2 = popgen.neiman_d2(lw.values.astype(float)[keep])
     iu = np.triu_indices_from(Dgeo, 1)
     x, y = Dgeo[iu], Dd2[iu]
-    b, a = np.polyfit(x, y, 1)
-    r, pr = popgen.mantel(Dd2, Dgeo, n_perm=9999, method="spearman", rng=RNG)
+    ibd = B["mataa"]["ibd"]["plain"]
+    # the model standardizes both axes; map the standardized slope back to data units
+    mx, sx, my, sy = x.mean(), x.std(), y.mean(), y.std()
+    xs = np.linspace(x.min(), x.max(), 50)
+    def _line(b_std):
+        return my + b_std * (sy / sx) * (xs - mx)
     axD.scatter(x, y, s=26, color="#3a6ea5", alpha=0.8, zorder=3)
-    xs = np.array([x.min(), x.max()])
-    axD.plot(xs, a + b * xs, color="#c0392b", lw=1.6,
-             label=f"Spearman r={r:.2f}, p={pr:.3g}")
+    axD.fill_between(xs, _line(ibd["slope_hdi_lo"]), _line(ibd["slope_hdi_hi"]),
+                     color="#c0392b", alpha=0.18, zorder=1, label="95% credible band")
+    axD.plot(xs, _line(ibd["slope_median"]), color="#c0392b", lw=1.6, zorder=2,
+             label=f"slope {ibd['slope_median']:+.2f}, P(slope>0)={ibd['p_positive']:.2f}")
     axD.set_xlabel("geographic distance (km)")
     axD.set_ylabel(r"compositional distance (Neiman $d^2$)")
     axD.set_title("D. Mata'a isolation by distance (island-wide)",
@@ -393,88 +399,96 @@ GEN_BASQUE = 0.0053
 
 def fig_convergence(path="figures/fig5_convergence.png"):
     """Genes and artifacts converge on the same hyperlocal structure."""
-    import harden
+    B = _bayes()
     fig, (axA, axB) = plt.subplots(1, 2, figsize=(12.6, 5.3))
 
-    # --- Panel A: F_ST across evidence classes ---
-    lw, _ = tables_io.stem_length_width()
-    o_m, _, lo_m, hi_m, _ = _fst_row(lw.values.astype(float))
-    o_u, _, lo_u, hi_u, _ = _fst_row(umu_mod.counts(umu_mod.load()))
-    md = moai_mod.load()
-    mdem = moai_mod.primary_demes(md)
-    mloci = moai_mod.select_loci(md)
-    o_o, _, _, _, _ = _fst_row(None, md, mdem, mloci)
-
-    rows = [  # (label, value, lo, hi, color)
+    # --- Panel A: posterior cultural F_ST vs genetic F_ST ---
+    m = B["mataa"]["headline"]["lengthwidth"]
+    u = B["umu"]["headline"]
+    o = B["moai"]["headline"]
+    rows = [  # (label, median, lo, hi, color)
         ("Rapa Nui genes\n(aDNA; Dudgeon 2008)", GEN_RAPANUI, np.nan, np.nan, "#6a3d9a"),
         ("typical human pop.\n(Basque, reference)", GEN_BASQUE, np.nan, np.nan, "#b39ddb"),
-        ("umu oven style", o_u, lo_u, hi_u, "#1a5276"),
-        ("moai style (multilocus)", o_o, np.nan, np.nan, "#1a5276"),
-        ("mata'a stem L×W", o_m, lo_m, hi_m, "#1a5276"),
+        ("umu oven style", u["median"], u["hdi_lo"], u["hdi_hi"], "#1a5276"),
+        ("moai style (multilocus)", o["median"], o["hdi_lo"], o["hdi_hi"], "#1a5276"),
+        ("mata'a stem L×W", m["median"], m["hdi_lo"], m["hdi_hi"], "#1a5276"),
     ]
     ys = np.arange(len(rows))[::-1]
-    for y, (lab, o, lo, hi, col) in zip(ys, rows):
+    top = ys.max()
+    for y, (lab, med, lo, hi, col) in zip(ys, rows):
         if np.isfinite(lo):
-            axA.plot([lo, hi], [y, y], color=col, lw=2.4, zorder=2)
-        axA.scatter([o], [y], s=95, color=col, zorder=3)
-        axA.annotate(f"{o:.3f}", (o, y), textcoords="offset points",
-                     xytext=(9, 0), va="center", fontsize=8.5)
+            axA.plot([lo, hi], [y, y], color=col, lw=2.6, zorder=2)
+        axA.scatter([med], [y], s=95, color=col, zorder=3)
+        # value label to the right of the point (or its HDI bar), clear of the axis
+        anchor = hi if np.isfinite(lo) else med
+        axA.annotate(f"{med:.3f}", (anchor, y), textcoords="offset points",
+                     xytext=(9, 0), va="center", ha="left", fontsize=8.5)
     axA.axvline(0.01, color="#888888", ls="--", lw=1, zorder=1)
-    axA.annotate("0.01: appreciable\nbetween-group structure", (0.01, 0.15),
-                 xytext=(8, 0), textcoords="offset points", fontsize=7.2, color="#666666")
+    axA.text(0.01, top + 0.55, "0.01 (appreciable structure)", rotation=0, ha="left",
+             va="bottom", fontsize=7.4, color="#777777")
     axA.scatter([], [], s=95, color="#6a3d9a", label="genetic $F_{ST}$")
     axA.scatter([], [], s=95, color="#1a5276", label="cultural $F_{ST}$ (this study)")
     axA.set_yticks(ys)
     axA.set_yticklabels([r[0] for r in rows], fontsize=8.5)
-    axA.set_xlabel("$F_{ST}$  (bars = bootstrap 95% CI)")
-    axA.set_title("A. Genes and artifacts both record strong intra-island structure",
+    axA.set_xlabel("$F_{ST}$  (cultural: posterior median, bar = 95% HDI)")
+    axA.set_title("A. Genes and artifacts both record intra-island structure",
                   fontsize=9.5, loc="left")
-    axA.set_xlim(0, 0.16)
-    axA.legend(fontsize=8, frameon=False, loc="lower right")
+    axA.set_xlim(-0.005, 0.18)
+    axA.set_ylim(-0.6, top + 1.1)
+    axA.legend(fontsize=8, frameon=False, loc="lower right", bbox_to_anchor=(1.0, 0.04))
     for sp in ("top", "right"):
         axA.spines[sp].set_visible(False)
 
-    # --- Panel B: island-wide 'distance' signal is a regional artifact ---
-    def plain_partial(mat):
+    # --- Panel B: island-wide distance slope is a regional contrast ---
+    def slopes(mat):
         names = [n for n in mat.index if spatial.has_coords(n)]
         counts = mat.loc[names].values.astype(float)
         Dgeo = spatial.distance_matrix(names)
         Dcomp = popgen.neiman_d2(counts)
-        region = np.array([0 if n in harden.PARCELS else 1 for n in names])
+        region = np.array([0 if n in PARCELS_FIG else 1 for n in names])
         Dregion = (region[:, None] != region[None, :]).astype(float)
-        r, _ = popgen.mantel(Dcomp, Dgeo, n_perm=9999, method="pearson", rng=RNG)
-        rp, _ = popgen.partial_mantel(Dcomp, Dgeo, Dregion, n_perm=9999, rng=RNG)
-        return r, rp
+        plain = bayes.ibd_regression(Dcomp, Dgeo)
+        ctrl = bayes.ibd_regression(Dcomp, Dgeo, region=Dregion)
+        return plain, ctrl
 
+    lw, _ = tables_io.stem_length_width()
     ss, _ = tables_io.stem_shoulder_shape()
-    r_lw, rp_lw = plain_partial(lw)
-    r_ss, rp_ss = plain_partial(ss)
+    p_lw, c_lw = slopes(lw)
+    p_ss, c_ss = slopes(ss)
     groups = ["mata'a\nstem L×W", "mata'a\nshape×shoulder"]
     x = np.arange(len(groups))
     w = 0.36
-    axB.bar(x - w/2, [r_lw, r_ss], w, label="plain Mantel (vs distance)", color="#3a6ea5")
-    axB.bar(x + w/2, [rp_lw, rp_ss], w, label="partial | east/SW region", color="#c0392b")
-    axB.axhline(0, color="#333333", lw=0.8)
+    pl = [p_lw, p_ss]
+    ct = [c_lw, c_ss]
+
+    def _bars(offset, recs, color, label):
+        meds = [r["slope_median"] for r in recs]
+        los = [r["slope_median"] - r["slope_hdi_lo"] for r in recs]
+        his = [r["slope_hdi_hi"] - r["slope_median"] for r in recs]
+        axB.bar(x + offset, meds, w, color=color, label=label, zorder=2)
+        axB.errorbar(x + offset, meds, yerr=[los, his], fmt="none",
+                     ecolor="#222222", elinewidth=1.1, capsize=3, zorder=3)
+
+    _bars(-w/2, pl, "#3a6ea5", "distance only")
+    _bars(+w/2, ct, "#c0392b", "controlling for region")
+    axB.axhline(0, color="#333333", lw=0.8, zorder=1)
     axB.set_xticks(x)
     axB.set_xticklabels(groups, fontsize=8.5)
-    axB.set_ylabel("Mantel correlation $r$")
-    axB.set_ylim(-0.15, 0.85)
+    axB.set_ylabel("posterior distance slope (median, bar = 95% HDI)")
+    axB.set_ylim(-0.9, 1.15)
     axB.set_title("B. The island-wide distance signal is a regional contrast",
                   fontsize=9.5, loc="left")
-    axB.annotate("Control region and the distance signal vanishes — a step\n"
-                 "between regional pools, not a cline. The same holds in the\n"
-                 "other proxies: moai IBD r = −0.10 (n.s.); Dudgeon's genetic\n"
-                 "structure is \"conditioned on features other than distance\".",
-                 (0.5, 0.99), xycoords="axes fraction", ha="center", va="top",
-                 fontsize=7.6, color="#444444")
-    axB.legend(fontsize=8, frameon=False, loc="upper left",
-               bbox_to_anchor=(0.0, 0.82))
+    # one short takeaway, in clear space at the bottom; full reading is in the caption
+    axB.text(0.5, -0.78, "controlling for region collapses the slope to zero:\n"
+             "a step between regional pools, not a cline", ha="center", va="center",
+             fontsize=7.8, color="#555555", style="italic")
+    axB.legend(fontsize=8, frameon=False, loc="upper right", ncol=1)
     for sp in ("top", "right"):
         axB.spines[sp].set_visible(False)
 
+    fig.tight_layout(rect=[0, 0, 1, 0.93])
     fig.suptitle("Convergent evidence for hyperlocal community structure on Rapa Nui",
-                 fontsize=12, y=1.0)
-    fig.tight_layout(rect=[0, 0, 1, 0.97])
+                 fontsize=12, y=0.99)
     _savefig(fig, path, 160)
     plt.close(fig)
     print("wrote", path)

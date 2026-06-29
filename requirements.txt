@@ -1,8 +1,18 @@
-# Reproduction environment for the hyperlocality analysis.
-# Tested with Python 3.12 and the versions below; nearby versions should work.
-numpy>=1.26
+# Reproduction environment for the hyperlocality analysis (Python 3.12).
+# Runs the full DEM-free pipeline: frequentist comparison, the primary Bayesian
+# cultural-F_ST analysis, the intervisibility analysis (from committed
+# intermediates), the spatially matched nulls, and the figures.
+#
+# GDAL/osgeo is required ONLY to recompute viewsheds from the licensed 50 cm DEM
+# (src/ahu_viewshed.py, viewshed_models.py, run_viewshed_coastal_null.py,
+# make_viewshed_figure.py). The committed data/viewshed/ intermediates and
+# output/viewshed_*.json make it unnecessary for reproduction.
+numpy<2            # PyMC requires numpy<2
 scipy>=1.11
 pandas>=2.0
 matplotlib>=3.8
-openpyxl>=3.1     # pandas.read_excel backend for the moai .xlsx database
-Pillow>=10.0      # basemap tile handling in figbase.py (figures only)
+pymc>=5.20,<6
+arviz>=0.18
+networkx>=3.0
+openpyxl>=3.1      # pandas.read_excel backend for the moai .xlsx database
+Pillow>=10.0       # basemap tile handling in figbase.py (figures only)
