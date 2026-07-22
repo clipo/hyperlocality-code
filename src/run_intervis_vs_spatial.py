@@ -46,7 +46,6 @@ def main():
     a_lon = np.array([a["lon"] for a in comm])
     a_lat = np.array([a["lat"] for a in comm])
     a_comm = np.array([a["community"] for a in comm])
-    n_ahu = len(comm)
 
     df = moai_mod.load()
     loci = moai_mod.select_loci(df)
@@ -76,7 +75,6 @@ def main():
     # at least one matched moai (so null partitions are over the same points)
     used_ahu = np.array(sorted(set(ahu_of_moai.tolist())))
     ux, uy = a_lon[used_ahu], a_lat[used_ahu]
-    lon0, lat0 = float(ux.mean()), float(uy.mean())
 
     rng = np.random.default_rng(SEED)
     null = np.empty(K_NULL)

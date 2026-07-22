@@ -89,7 +89,6 @@ def main():
     a_lon = np.array([a["lon"] for a in comm])
     a_lat = np.array([a["lat"] for a in comm])
     a_comm = np.array([a["community"] for a in comm])
-    lat0, lon0 = float(a_lat.mean()), float(a_lon.mean())
 
     df = moai_mod.load()
     loci = moai_mod.select_loci(df)

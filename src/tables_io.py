@@ -5,8 +5,6 @@ Table 2/4 = stem shape (P/R/S/SR) x shoulder shape (C/A) -> 6 classes (n=348).
 Empty cells are real zeros; we validate the parse against the printed row totals.
 """
 import os
-import re
-import numpy as np
 import pandas as pd
 
 HTML_DIR = "/tmp/mataatables"

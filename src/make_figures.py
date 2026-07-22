@@ -345,7 +345,7 @@ def fig_results(path="figures/fig3_results.png"):
     med = np.array(med)[ordr]; lo = np.array(lo)[ordr]; hi = np.array(hi)[ordr]
     yy = range(len(feats))
     # a locus "carries" the signal if its 95% HDI clears the 0.01 structure floor
-    cols = ["#1a5276" if l > 0.01 else "#aaaaaa" for l in lo]
+    cols = ["#1a5276" if v > 0.01 else "#aaaaaa" for v in lo]
     axC.barh(list(yy), med, color=cols, zorder=2)
     axC.hlines(list(yy), lo, hi, color="#222222", lw=1.2, zorder=3)
     axC.set_yticks(list(yy))
@@ -424,7 +424,7 @@ def fig_convergence(path="figures/fig5_convergence.png"):
         axA.annotate(f"{med:.3f}", (anchor, y), textcoords="offset points",
                      xytext=(9, 0), va="center", ha="left", fontsize=8.5)
     axA.axvline(0.01, color="#888888", ls="--", lw=1, zorder=1)
-    axA.text(0.01, top + 0.55, "0.01 (appreciable structure)", rotation=0, ha="left",
+    axA.text(0.01, top + 0.55, "0.01 (reference)", rotation=0, ha="left",
              va="bottom", fontsize=7.4, color="#777777")
     axA.scatter([], [], s=95, color="#6a3d9a", label="genetic $F_{ST}$")
     axA.scatter([], [], s=95, color="#1a5276", label="cultural $F_{ST}$ (this study)")

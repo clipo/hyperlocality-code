@@ -12,7 +12,7 @@ python3.  Run:  python3 src/make_moai_anatomy_figure.py
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-from matplotlib.patches import Polygon, FancyBboxPatch
+from matplotlib.patches import Polygon
 
 import moai as moai_mod
 

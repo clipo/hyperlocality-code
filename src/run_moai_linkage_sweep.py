@@ -13,7 +13,6 @@ import json
 import numpy as np
 
 import moai as moai_mod
-import popgen
 
 SEED = 20260628
 N_PERM = 9999

@@ -120,7 +120,6 @@ def main():
 
     # --- Panel A: hillshade + communities ---
     shade, sea, extent, proj = _hillshade()
-    shaded = np.ma.masked_where(sea, shade)
     axA.imshow(np.where(sea, np.nan, shade), extent=extent, cmap="gray",
                vmin=0, vmax=255, origin="upper", interpolation="bilinear")
     axA.imshow(np.where(sea, 1.0, np.nan), extent=extent, cmap=plt.cm.colors.ListedColormap(["#c9ddef"]),
@@ -154,19 +153,11 @@ def main():
     rows = [("network\nmodularity", t["modularity"]),
             ("number of\ncommunities", t["n_comm"]),
             ("community\ndiameter (km)", t["comm_diam_km"])]
-    ys2 = np.arange(len(rows))[::-1]
-    for y, (lab, d) in zip(ys2, rows):
-        lo, hi, nm, obs, z = d["null_lo"], d["null_hi"], d["null_mean"], d["observed"], d["z"]
-        rng = max(hi, obs) - min(lo, obs) or 1.0
-        # normalize each row to its own axis by plotting on a twin scale: use text + relative bar
-        axB.barh([y], [hi - lo], left=[lo], height=0.0)  # placeholder to set autoscale off
-    axB.clear()
-    # simpler: one normalized panel — plot observed vs null band per metric on separate mini-rows
+    # one normalized panel: observed vs null band per metric, on separate mini-rows
     labels = [r[0] for r in rows]
     for k, (lab, d) in enumerate(rows):
         y = len(rows) - 1 - k
         lo, hi, nm, obs = d["null_lo"], d["null_hi"], d["null_mean"], d["observed"]
-        span = (hi - lo) or 1.0
         # map [min,max] of (lo,hi,obs) to [0,1]
         lomin = min(lo, obs); himax = max(hi, obs); rng = (himax - lomin) or 1.0
         def nx_(v):

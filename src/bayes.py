@@ -38,7 +38,6 @@ Bayesian analogue of Nei's multilocus G_ST.
 import contextlib
 import io
 import logging
-import os
 
 import numpy as np
 import pymc as pm
@@ -175,6 +174,76 @@ def fst_summary(idata, hdi_prob=0.95):
 
 
 # --------------------------------------------------------------------------- #
+#  Gini-Simpson / Nei G_ST readout: a credible interval on the SAME estimator  #
+#  popgen.gst reports as a point value (the mls-emergence-symmetric readout)   #
+# --------------------------------------------------------------------------- #
+def _hdi_bounds(samples, hdi_prob=0.95):
+    """95% HDI of a 1-D sample array, robust across arviz keyword conventions."""
+    x = np.asarray(samples, float).ravel()
+    for kw in ("hdi_prob", "prob"):
+        try:
+            h = az.hdi(x, **{kw: hdi_prob})
+            return float(h[0]), float(h[1])
+        except TypeError:
+            continue
+    q = [100 * (1 - hdi_prob) / 2, 100 * (1 + hdi_prob) / 2]
+    lo, hi = np.percentile(x, q)
+    return float(lo), float(hi)
+
+
+def gst_posterior(idata, counts_or_list, seed=0):
+    """Posterior of Nei's (multilocus) G_ST on Gini-Simpson diversity for the
+    OBSERVED demes, reconstructed conjugately from the Balding-Nichols fit.
+
+    With the DirichletMultinomial(n_i, alpha*pi_l) likelihood and latent
+    p_{l,i} ~ Dirichlet(alpha*pi_l), the posterior of an observed deme's
+    frequency is p_{l,i} | x_{l,i} ~ Dirichlet(alpha*pi_l + x_{l,i}). For each
+    posterior draw of (F, pi) we reconstruct every deme's frequencies and compute
+    Nei's multilocus G_ST = (sum_l H_T,l - sum_l H_S,l) / sum_l H_T,l on
+    Gini-Simpson diversity H = 1 - sum p^2. This turns the frequentist point
+    estimate popgen.gst reports into a credible interval, from the same fit that
+    yields the Balding-Nichols F parameter -- the readout used in ../mls-emergence.
+    """
+    count_list = ([counts_or_list] if np.asarray(counts_or_list[0]).ndim == 1
+                  else list(counts_or_list))
+    F = np.asarray(idata.posterior["F"].values).ravel()      # (S,)
+    alpha = (1.0 - F) / F
+    rng = np.random.default_rng(seed)
+    HT = np.zeros_like(F)
+    HS = np.zeros_like(F)
+    for j, c in enumerate(count_list):
+        c, n_i = _prep(c)
+        K = c.shape[1]
+        w = n_i / n_i.sum()
+        pi = np.asarray(idata.posterior[f"pi_{j}"].values).reshape(-1, K)   # (S,K)
+        conc = alpha[:, None, None] * pi[:, None, :] + c[None, :, :]        # (S,D,K)
+        g = rng.standard_gamma(conc)
+        p = g / g.sum(axis=2, keepdims=True)                               # (S,D,K)
+        h_within = 1.0 - np.sum(p ** 2, axis=2)                            # (S,D)
+        HS = HS + np.sum(h_within * w[None, :], axis=1)                    # (S,)
+        p_pool = np.sum(p * w[None, :, None], axis=1)                      # (S,K)
+        HT = HT + (1.0 - np.sum(p_pool ** 2, axis=1))                      # (S,)
+    return np.where(HT > 0, (HT - HS) / HT, 0.0)
+
+
+def gst_summary(idata, counts_or_list, seed=0, hdi_prob=0.95):
+    """Posterior median, mean, and 95% HDI of the Gini-Simpson G_ST readout.
+
+    The frequentist plug-in (popgen.gst / gst_multilocus) is left to the caller,
+    which already computes it, so bayes.py stays decoupled from popgen.
+    """
+    g = gst_posterior(idata, counts_or_list, seed=seed)
+    lo, hi = _hdi_bounds(g, hdi_prob)
+    return {
+        "gst_median": float(np.median(g)),
+        "gst_mean": float(np.mean(g)),
+        "gst_hdi_lo": lo,
+        "gst_hdi_hi": hi,
+        "gst_samples": g,
+    }
+
+
+# --------------------------------------------------------------------------- #
 #  Bayes factor: structure (M1) vs panmixia (M0) -- the permutation-p analogue #
 # --------------------------------------------------------------------------- #
 def _smc_logml(count_list, structured, draws=SMC_DRAWS, chains=4, seed=SEED,
@@ -285,5 +354,6 @@ def ibd_regression(Dcomp, Dgeo, region=None, draws=DRAWS, tune=TUNE,
 
 __all__ = [
     "fst_posterior", "fst_posterior_multilocus", "fst_summary",
+    "gst_posterior", "gst_summary",
     "bayes_factor_structure", "ibd_regression",
 ]

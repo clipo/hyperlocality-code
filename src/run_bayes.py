@@ -5,8 +5,10 @@ posterior cultural F_ST (median + 95% credible interval), the structure-vs-panmi
 Bayes factor, per-attribute/per-locus posteriors, leave-one-deme-out posteriors,
 the within-cluster posterior (mata'a), and the Bayesian isolation-by-distance slope.
 Each headline Bayes factor is also reported under a second prior on F as a
-sensitivity check. The Nei G_ST point estimate and its panmixia-null mean are
-printed alongside for concordance (they are demoted to the Supplementary Material).
+sensitivity check. The Gini-Simpson / Nei G_ST is also reported as a Bayesian
+credible interval, reconstructed conjugately from the same BN fit (the readout
+used in ../mls-emergence), with the frequentist point estimate and its
+panmixia-null mean printed alongside for concordance.
 
 Writes a human report per proxy to output/bayes_<proxy>.txt, a cross-proxy table to
 output/bayes_summary.txt, and a machine-readable output/bayes_results.json that the
@@ -64,6 +66,12 @@ def _post_only(counts_or_list):
     gst = (popgen.gst_multilocus(counts_or_list) if isinstance(counts_or_list, list)
            else popgen.gst(counts_or_list)[0])
     s["gst"] = float(gst)
+    # Bayesian credible interval on the SAME Gini-Simpson / Nei G_ST estimator,
+    # reconstructed conjugately from the same BN fit (the ../mls-emergence readout).
+    gsum = bayes.gst_summary(idata, counts_or_list)
+    s["gst_bayes_median"] = gsum["gst_median"]
+    s["gst_bayes_hdi_lo"] = gsum["gst_hdi_lo"]
+    s["gst_bayes_hdi_hi"] = gsum["gst_hdi_hi"]
     return s
 
 
@@ -80,6 +88,9 @@ def _fst_line(label, counts_or_list, gst_value, gst_null=None):
         f", null {gst_null:.4f}" if gst_null is not None else "") + "]"
     print(f"    F_ST posterior: median={s['median']:.4f}  "
           f"95% HDI=[{s['hdi_lo']:.4f}, {s['hdi_hi']:.4f}]" + concord)
+    print(f"    G_ST posterior (Gini-Simpson): median={s['gst_bayes_median']:.4f}  "
+          f"95% HDI=[{s['gst_bayes_hdi_lo']:.4f}, {s['gst_bayes_hdi_hi']:.4f}]"
+          f"  (plug-in {gst_value:.4f})")
     print(f"    Bayes factor (structure vs panmixia): 2 ln BF = {bf['two_ln_bf']:+.1f}"
           f"  (log10 BF = {bf['log10_bf']:+.1f}; chain sd {bf['two_ln_bf_chain_sd']:.2f})"
           f"  -> {bf['evidence']}")

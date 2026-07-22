@@ -32,7 +32,7 @@ from pathlib import Path
 
 import numpy as np
 import networkx as nx
-from osgeo import gdal, osr
+from osgeo import gdal
 
 gdal.UseExceptions()
 

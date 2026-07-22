@@ -16,7 +16,6 @@ Run:  PYTHONPATH=src RAPANUI_DEM=... python3 src/run_viewshed_coastal_null.py [K
 """
 import json
 import math
-import statistics as st
 import sys
 from pathlib import Path
 

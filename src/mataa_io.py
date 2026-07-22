@@ -52,7 +52,6 @@ def load(path):
     for c in META_COLS:
         if df[c].dtype == object:
             df[c] = df[c].str.strip()
-    coord_cols = [c for c in df.columns if c.startswith("X") or c.startswith("Y")]
     xs = df[[f"X{i}" for i in range(1, N_POINTS + 1)]].to_numpy(float)
     ys = df[[f"Y{i}" for i in range(1, N_POINTS + 1)]].to_numpy(float)
     outlines = np.stack([xs, ys], axis=-1)  # (n, 200, 2)
